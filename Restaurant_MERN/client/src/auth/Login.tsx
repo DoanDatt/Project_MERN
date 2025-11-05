@@ -1,26 +1,30 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+import { userLoginSchema, type LoginInputState } from '@/schemas/userSchema'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-type LoginInputState = {
-  email: string
-  password: string
-}
 export default function Login() {
   const isLoading = false
   const [input, setInput] = useState<LoginInputState>({
     email: '',
     password: ''
   })
+  const [error, setError] = useState<Partial<LoginInputState>>({})
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target
     setInput((prev) => ({ ...prev, [name]: value }))
   }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    const result = userLoginSchema.safeParse(input)
+    if (!result.success) {
+      const fieldError = result.error.formErrors.fieldErrors
+      setError(fieldError as Partial<LoginInputState>)
+      return
+    }
     console.log(input)
   }
   return (
@@ -39,6 +43,7 @@ export default function Login() {
               value={input.email}
               name='email'
             />
+            {error && <span className='text-sm text-red-500'>{error.email}</span>}
           </div>
         </div>
         <div className='mb-4'>
@@ -51,6 +56,7 @@ export default function Login() {
               value={input.password}
               name='password'
             />
+            {error && <span className='text-sm text-red-500'>{error.password}</span>}
           </div>
         </div>
         <div className='mb-10'>

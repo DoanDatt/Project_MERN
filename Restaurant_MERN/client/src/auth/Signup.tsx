@@ -1,30 +1,32 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { userSignupSchema, type SignUpInputState } from '@/schemas/userSchema'
 import { Separator } from '@radix-ui/react-separator'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-type SignupState = {
-  fullname: string
-  email: string
-  password: string
-  contact: string
-}
 export default function Signup() {
   const isLoading = false
-  const [input, setInput] = useState<SignupState>({
+  const [input, setInput] = useState<SignUpInputState>({
     fullname: '',
     email: '',
     contact: '',
     password: ''
   })
+  const [error, setError] = useState<Partial<SignUpInputState>>({})
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target
     setInput((prev) => ({ ...prev, [name]: value }))
   }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    const result = userSignupSchema.safeParse(input)
+    if (!result.success) {
+      const fieldError = result.error.formErrors.fieldErrors
+      setError(fieldError as Partial<SignUpInputState>)
+      return
+    }
     console.log(input)
   }
   return (
@@ -43,6 +45,7 @@ export default function Signup() {
               name='email'
               value={input.email}
             />
+            {error && <span className='text-sm text-red-500'>{error.email}</span>}
           </div>
         </div>
         <div className='mb-4'>
@@ -55,6 +58,7 @@ export default function Signup() {
               name='fullname'
               value={input.fullname}
             />
+            {error && <span className='text-sm text-red-500'>{error.fullname}</span>}
           </div>
         </div>
         <div className='mb-4'>
@@ -67,6 +71,7 @@ export default function Signup() {
               name='contact'
               value={input.contact}
             />
+            {error && <span className='text-sm text-red-500'>{error.contact}</span>}
           </div>
         </div>
         <div className='mb-4'>
@@ -79,6 +84,7 @@ export default function Signup() {
               name='password'
               value={input.password}
             />
+            {error && <span className='text-sm text-red-500'>{error.password}</span>}
           </div>
         </div>
         <div className='mb-10'>
